@@ -29,25 +29,37 @@ IndexBuffer* ibb;
 #define ROW 7
 #define COL 7
 
-class timer {
-private:
-    unsigned long begTime;
-public:
-    void start() {
-        begTime = clock();
-    }
-
-    unsigned long elapsedTime() {
-        return ((unsigned long)clock() - begTime) / 600;
-    }
-
-    bool isTimeout(unsigned long seconds) {
-        return seconds >= elapsedTime();
-    }
-};
-
 int dRow[] = { 0, 1, 0, -1 };
 int dCol[] = { -1, 0, 1, 0 };
+
+void Draw(int vis[ROW][COL],Shader shader, vector<vector<glm::vec3>> translations, glm::mat4 proj, glm::mat4 view, GLFWwindow* window)
+{
+    for (int i = 0; i < ROW; i++)
+    {
+        for (int j = 0; j < COL; j++)
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translations[i][j]);
+            glm::mat4 mvp = proj * view * model;
+            if (vis[i][j] == 2)
+            {
+                shader.SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
+            }
+            else if (vis[i][j] == 1)
+            {
+                shader.SetUniform4f("u_Color", 1.0f, 0.63f, 1.0f, 1.0f);
+            }
+            else
+            {
+                shader.SetUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
+
+            }
+            shader.Bind();
+            shader.SetUniformMat4f("u_MVP", mvp);
+            rendererr->Draw(*vaa, *ibb, shader);
+        }
+
+    }
+}
 
 bool isValid(int vis[ROW][COL], int row, int col)
 {
@@ -59,7 +71,6 @@ bool isValid(int vis[ROW][COL], int row, int col)
 
     return true;
 }
-
 
 void DFS(int rowS, int colS, int grid[ROW][COL], int vis[ROW][COL], Shader shader, vector<vector<glm::vec3>> translations, glm::mat4 proj, glm::mat4 view, GLFWwindow* window)
 {
@@ -82,63 +93,13 @@ void DFS(int rowS, int colS, int grid[ROW][COL], int vis[ROW][COL], Shader shade
         if (grid[col][row] == 2)
         {
             vis[row][col] = 2;
-
-            for (int i = 0; i < ROW; i++)
-            {
-                for (int j = 0; j < COL; j++)
-                {
-                    glm::mat4 model = glm::translate(glm::mat4(1.0f), translations[i][j]);
-                    glm::mat4 mvp = proj * view * model;
-                    if (vis[i][j] == 2)
-                    {
-                        shader.SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
-                    }
-                    else if (vis[i][j] == 1)
-                    {
-                        shader.SetUniform4f("u_Color", 1.0f, 0.63f, 1.0f, 1.0f);
-                    }
-                    else
-                    {
-                        shader.SetUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
-
-                    }
-                    shader.Bind();
-                    shader.SetUniformMat4f("u_MVP", mvp);
-                    rendererr->Draw(*vaa, *ibb, shader);
-
-                }
-
-            }
+            Draw(vis, shader, translations, proj, view, window);
             break;
         }
-  
-        for (int i = 0; i < ROW; i++)
-        {
-            for (int j = 0; j < COL; j++)
-            {
-                glm::mat4 model = glm::translate(glm::mat4(1.0f), translations[i][j]);           
-                glm::mat4 mvp = proj * view * model;
-                if (vis[i][j] == 2)
-                {
-                    shader.SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
-                }
-                else if (vis[i][j] == 1)
-                {
-                    shader.SetUniform4f("u_Color", 1.0f, 0.63f, 1.0f, 1.0f);
-                }
-                else
-                {
-                    shader.SetUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
-
-                }
-                shader.Bind();
-                shader.SetUniformMat4f("u_MVP", mvp);
-                rendererr->Draw(*vaa, *ibb, shader);
-            }
-        }
+ 
+        Draw(vis, shader, translations, proj, view, window);
         glfwSwapBuffers(window);
         glfwPollEvents();
-        
         Sleep(400);
         for (int i = 0; i < 4; i++) {
             int adjx = row + dRow[i];
@@ -171,61 +132,13 @@ void BFS(int row, int col, int grid[ROW][COL], int vis[ROW][COL], Shader shader,
             {
                 vis[x][y] = 2;
 
-                for (int i = 0; i < ROW; i++)
-                {
-                    for (int j = 0; j < COL; j++)
-                    {
-                        glm::mat4 model = glm::translate(glm::mat4(1.0f), translations[i][j]);
-                        glm::mat4 mvp = proj * view * model;
-                        if (vis[i][j] == 2)
-                        {
-                            shader.SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
-                        }
-                        else if (vis[i][j] == 1)
-                        {
-                            shader.SetUniform4f("u_Color", 1.0f, 0.63f, 1.0f, 1.0f);
-                        }
-                        else
-                        {
-                            shader.SetUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
-
-                        }
-                        shader.Bind();
-                        shader.SetUniformMat4f("u_MVP", mvp);
-                        rendererr->Draw(*vaa, *ibb, shader);
-                    }
-
-                }
+                Draw(vis,shader,translations,proj,view,window);
                 break;
             }
             Sleep(500);
             
         }
-        for (int i = 0; i < ROW; i++)
-        {
-            for (int j = 0; j < COL; j++)
-            {
-                glm::mat4 model = glm::translate(glm::mat4(1.0f), translations[i][j]);
-                glm::mat4 mvp = proj * view * model;
-                if (vis[i][j] == 2)
-                {
-                    shader.SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
-                }
-                else if (vis[i][j] == 1)
-                {
-                    shader.SetUniform4f("u_Color", 1.0f, 0.63f, 1.0f, 1.0f);
-                }
-                else
-                {
-                    shader.SetUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
-
-                }
-                shader.Bind();
-                shader.SetUniformMat4f("u_MVP", mvp);
-                rendererr->Draw(*vaa, *ibb, shader);
-            }
-        }
-        
+        Draw(vis, shader, translations, proj, view, window);
         glfwSwapBuffers(window);
         glfwPollEvents();
 
@@ -249,7 +162,7 @@ int main(void)
     GLFWwindow* window;
     if (!glfwInit())
         return -1;
-    window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(960, 540, "Searching Visualizer", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -339,34 +252,12 @@ int main(void)
     ibb = &ib;
     rendererr = &renderer;
 
-    DFS(0, 0, map, vis,Wshader,translations,proj,view,window);
+    BFS(0, 0, map, vis,Wshader,translations,proj,view,window);
 
     while (!glfwWindowShouldClose(window))
     {
         renderer.Clear();
-        for (int i = 0; i < ROW; i++)
-        {
-            for (int j = 0; j < COL; j++)
-            {
-                glm::mat4 model = glm::translate(glm::mat4(1.0f), translations[i][j]);
-                glm::mat4 mvp = proj * view * model;
-                if (vis[i][j] == 2)
-                {
-                    Wshader.SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
-                }
-                else if (vis[i][j] == 1)
-                {
-                    Wshader.SetUniform4f("u_Color", 1.0f, 0.63f, 1.0f, 1.0f);
-                }
-                else
-                {
-                    Wshader.SetUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
-                }
-                Wshader.Bind();
-                Wshader.SetUniformMat4f("u_MVP", mvp);
-                renderer.Draw(va, ib, Wshader);
-            }
-        }       
+        Draw(vis, Wshader, translations, proj, view, window);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
