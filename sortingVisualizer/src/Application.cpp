@@ -134,13 +134,11 @@ void BFS(int row, int col, vector<vector<int>> &grid, vector<vector<int>> &vis, 
                 Draw(vis,shader,translations,proj,view,window);
                 break;
             }
+            Draw(vis, shader, translations, proj, view, window);
             Sleep(300);
-            
+            glfwSwapBuffers(window);
+            glfwPollEvents();
         }
-        Draw(vis, shader, translations, proj, view, window);
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-
        
         // Go to the adjacent cells
         for (int i = 0; i < 4; i++) {
