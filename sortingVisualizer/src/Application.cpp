@@ -55,11 +55,12 @@ void Draw(vector<vector<int>> &vis,Shader shader, vector<vector<glm::vec3>> tran
             shader.Bind();
             shader.SetUniformMat4f("u_MVP", mvp);
             rendererr->Draw(*vaa, *ibb, shader);
+            //glfwSwapBuffers(window);
+            //glfwPollEvents();
         }
 
     }
 }
-
 bool isValid(vector<vector<int>> &vis, int row, int col)
 {
     if (row < 0 || col < 0 || row >= rows || col >= cols)
@@ -70,7 +71,6 @@ bool isValid(vector<vector<int>> &vis, int row, int col)
 
     return true;
 }
-
 void DFS(int rowS, int colS, vector<vector<int>> &grid, vector<vector<int>> &vis, Shader shader, vector<vector<glm::vec3>> translations, glm::mat4 proj, glm::mat4 view, GLFWwindow* window)
 {
    
@@ -89,7 +89,7 @@ void DFS(int rowS, int colS, vector<vector<int>> &grid, vector<vector<int>> &vis
         vis[row][col] = 1;
         cout << row << " " << col << "\n";
 
-        if (grid[col][row] == 2)
+        if (grid[row][col] == 2)
         {
             vis[row][col] = 2;
             Draw(vis, shader, translations, proj, view, window);
@@ -127,14 +127,14 @@ void BFS(int row, int col, vector<vector<int>> &grid, vector<vector<int>> &vis, 
             cout << x << " " << y << "\n";
 
             vis[x][y] = 1;
-            if (grid[y][x] == 2)
+            if (grid[x][y] == 2)
             {
                 vis[x][y] = 2;
 
                 Draw(vis,shader,translations,proj,view,window);
                 break;
             }
-            Sleep(500);
+            Sleep(300);
             
         }
         Draw(vis, shader, translations, proj, view, window);
@@ -158,10 +158,24 @@ void BFS(int row, int col, vector<vector<int>> &grid, vector<vector<int>> &vis, 
 int main(void)
 {
 
+    cout << "How many rows: ";
+    cin >> rows;
+    cout << "How many columns: ";
+    cin >> cols;
+    cout << "What is the row of the targeted location: ";
+    int targetRow; cin >> targetRow;
+    cout << "What is the column of the targeted location: ";
+    int targetCol; cin >> targetCol;
+    vector<vector<int>> map(rows, vector<int>(cols));
+    vector<vector<int>> vis(rows, vector<int>(cols));
+    map[targetRow - 1][targetCol - 1] = 2;
+    cout << "Choose 1 for DFS and 2 for BFS: ";
+    int option; cin >> option;
+
     GLFWwindow* window;
     if (!glfwInit())
         return -1;
-    window = glfwCreateWindow(960, 540, "Searching Visualizer", NULL, NULL);
+    window = glfwCreateWindow(960, 960, "Searching Visualizer", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -181,6 +195,7 @@ int main(void)
         20.0f,  20.0f,  1.0f,   1.0f,  //Top right
         0.0f,   20.0f,  0.0f,   1.0f   //Top Left 
     };
+
     unsigned int indices[] = {
         0,1,2,
         2,3,0
@@ -195,7 +210,7 @@ int main(void)
 
     IndexBuffer ib(indices, 6);
 
-    glm::mat4 proj = glm::ortho(0.0f,960.0f,0.0f,540.0f,-1.0f,1.0f);
+    glm::mat4 proj = glm::ortho(0.0f,960.0f,960.0f,0.0f,-1.0f,1.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,0));
     glm::vec4 vp(100.0f,100.0f,0.0f,1.0f);
     glm::vec4 result = proj * vp;
@@ -212,52 +227,20 @@ int main(void)
     float stepY = 0;
     float margin = 0;
     
-    cout << "How many rows: ";
-    cin >> rows;
-    cout << "How many columns: ";
-    cin >> cols;
-    cout << "What is the row of the targeted location: ";
-    int targetRow; cin >> targetRow;
-    cout << "What is the column of the targeted location: ";
-    int targetCol; cin >> targetCol;
-    vector<vector<int>> map(rows, vector<int>(cols));
-    vector<vector<int>> vis(rows, vector<int>(cols));
-    map[targetRow-1][targetCol-1] = 2;
-    cout << "Choose 1 for DFS and 2 for BFS: ";
-    int option; cin >> option;
+    
 
     vector<vector<glm::vec3>> translations(rows, vector<glm::vec3>(cols));
-
-    /*int map[7][7] = {
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,2,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0}
-    };*/
-
-    /*int vis[7][7] = {
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0}
-    };*/
 
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
         {
-            translations[i][j].x += stepX;
-            translations[i][j].y = 520 -  stepY;
-            stepY += 25;
+            translations[i][j].x = stepX;
+            translations[i][j].y += stepY;
+            stepX += 25;
         }
-        stepY = 0;
-        stepX += 25;
+        stepX = 0;
+        stepY += 25;
     }
 
     Shader Wshader;
